@@ -104,17 +104,18 @@ num_classes = len(class_names)
 
 # Create the model with sequential
 model = Sequential([
-    data_augmentation,
-    layers.Rescaling(1. / 255, input_shape=(img_height, img_width, 3)),
+    data_augmentation,      # apply data augmentation
+    layers.Rescaling(1. / 255),
     layers.Conv2D(16, 3, padding='same', activation='relu'),
     layers.MaxPooling2D(),
     layers.Conv2D(32, 3, padding='same', activation='relu'),
     layers.MaxPooling2D(),
     layers.Conv2D(64, 3, padding='same', activation='relu'),
     layers.MaxPooling2D(),
+    layers.Dropout(0.2),    # apply dropout
     layers.Flatten(),
     layers.Dense(128, activation='relu'),
-    layers.Dense(num_classes)
+    layers.Dense(num_classes, name="outputs")
 ])
 
 # Optimize the model
@@ -124,15 +125,15 @@ model.compile(optimizer='adam',
 
 model.summary()
 
-# Train the model for 10 epochs
-epochs = 10
+# Train the model for 15 epochs
+epochs = 15
 history = model.fit(
     train_ds,
     validation_data=val_ds,
     epochs=epochs
 )
 
-# Visualize the accuracy results of the training and validation sets
+# Visualize the accuracy and loss results of the training and validation sets
 acc = history.history['accuracy']
 val_acc = history.history['val_accuracy']
 
@@ -156,3 +157,4 @@ plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
 plt.savefig('plot.png')
 plt.show()
+
