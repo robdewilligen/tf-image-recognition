@@ -1,9 +1,9 @@
 import pathlib
+
+import PIL
 import matplotlib.pyplot as plt
 import numpy as np
-import PIL
 import tensorflow as tf
-
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
@@ -56,13 +56,27 @@ val_ds = tf.keras.utils.image_dataset_from_directory(
 class_names = train_ds.class_names
 print(class_names)
 
+# add data augmentation to increase the amount of available data to train with
+# Randomflip will mirror the image, Randomrotate will rotate the image and Randomzoom wil zoom in on the image
+data_augmentation = keras.Sequential(
+    [
+        layers.RandomFlip("horizontal",
+                          input_shape=(img_height,
+                                       img_width,
+                                       3)),
+        layers.RandomRotation(0.1),
+        layers.RandomZoom(0.1),
+    ]
+)
+
 # Visualize/Plot the pictures
 plt.figure(figsize=(10, 10))
-for images, labels in train_ds.take(1):
+for images, _ in train_ds.take(1):
     for i in range(9):
+        augmented_images = data_augmentation(images)
         ax = plt.subplot(3, 3, i + 1)
         plt.imshow(images[i].numpy().astype("uint8"))
-        plt.title(class_names[labels[i]])
+        plt.title(class_names[_[i]])
         plt.axis("off")
 
 for image_batch, labels_batch in train_ds:
@@ -77,7 +91,7 @@ train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
 val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 # Standardize data
-normalization_layer = layers.Rescaling(1./255)
+normalization_layer = layers.Rescaling(1. / 255)
 
 normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
 image_batch, labels_batch = next(iter(normalized_ds))
@@ -90,16 +104,17 @@ num_classes = len(class_names)
 
 # Create the model with sequential
 model = Sequential([
-  layers.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
-  layers.Conv2D(16, 3, padding='same', activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Conv2D(32, 3, padding='same', activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Conv2D(64, 3, padding='same', activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Flatten(),
-  layers.Dense(128, activation='relu'),
-  layers.Dense(num_classes)
+    data_augmentation,
+    layers.Rescaling(1. / 255, input_shape=(img_height, img_width, 3)),
+    layers.Conv2D(16, 3, padding='same', activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Conv2D(32, 3, padding='same', activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Conv2D(64, 3, padding='same', activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Flatten(),
+    layers.Dense(128, activation='relu'),
+    layers.Dense(num_classes)
 ])
 
 # Optimize the model
@@ -112,9 +127,9 @@ model.summary()
 # Train the model for 10 epochs
 epochs = 10
 history = model.fit(
-  train_ds,
-  validation_data=val_ds,
-  epochs=epochs
+    train_ds,
+    validation_data=val_ds,
+    epochs=epochs
 )
 
 # Visualize the accuracy results of the training and validation sets
@@ -126,6 +141,7 @@ val_loss = history.history['val_loss']
 
 epochs_range = range(epochs)
 
+# Create the plots
 plt.figure(figsize=(8, 8))
 plt.subplot(1, 2, 1)
 plt.plot(epochs_range, acc, label='Training Accuracy')
@@ -138,4 +154,5 @@ plt.plot(epochs_range, loss, label='Training Loss')
 plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
+plt.savefig('plot.png')
 plt.show()
