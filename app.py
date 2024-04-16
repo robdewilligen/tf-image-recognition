@@ -83,4 +83,3 @@ first_image = image_batch[0]
 # Notice the pixel values are now in `[0,1]`.
 print(np.min(first_image), np.max(first_image))
 
-
