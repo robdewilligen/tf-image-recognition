@@ -13,3 +13,6 @@ Iteration 3: with dropout regularization
 Goal: Improve the accuracy of the model by applying dropout regulation  
 Note: due to the dropouts we need to increase the amount of epochs to get a better accuracy
 - accuracy: 0.7862, validation_accuracy: 0.7289
+
+The addition of the second and third iteration allow the models accuracy to be closer to the 
+validation accuracy, which will give better results once the model will be used against unknown data
