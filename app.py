@@ -62,12 +62,10 @@ print(class_names)
 # Randomflip will mirror the image, Randomrotate will rotate the image and Randomzoom wil zoom in on the image
 data_augmentation = tf.keras.Sequential(
     [
-        keras.layers.RandomFlip("horizontal",
-                                input_shape=(img_height,
-                                             img_width,
-                                             3)),
-        keras.layers.RandomRotation(0.1),
-        keras.layers.RandomZoom(0.1),
+        tf.keras.layers.InputLayer(shape=(img_height, img_width, 3)),
+        tf.keras.layers.RandomFlip("horizontal"),
+        tf.keras.layers.RandomRotation(0.1),
+        tf.keras.layers.RandomZoom(0.1),
     ]
 )
 
@@ -107,22 +105,22 @@ num_classes = len(class_names)
 # Create the model with sequential
 model = tf.keras.Sequential([
     data_augmentation,  # apply data augmentation
-    keras.layers.Rescaling(1. / 255),
-    keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
-    keras.layers.MaxPooling2D(data_format="channels_last"),
-    keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
-    keras.layers.MaxPooling2D(data_format="channels_last"),
-    keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
-    keras.layers.MaxPooling2D(data_format="channels_last"),
-    keras.layers.Dropout(0.2),  # apply dropout
-    keras.layers.Flatten(),
-    keras.layers.Dense(128, activation='relu'),
-    keras.layers.Dense(num_classes, name="outputs")
+    tf.keras.layers.Rescaling(1. / 255),
+    tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
+    tf.keras.layers.MaxPooling2D(data_format="channels_last"),
+    tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
+    tf.keras.layers.MaxPooling2D(data_format="channels_last"),
+    tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
+    tf.keras.layers.MaxPooling2D(data_format="channels_last"),
+    tf.keras.layers.Dropout(0.2),  # apply dropout
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(num_classes, activation='softmax', name="outputs")
 ])
 
 # Optimize the model
 model.compile(optimizer='adam',
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
               metrics=['accuracy'])
 
 model.summary()
@@ -161,27 +159,34 @@ plt.savefig('plot.png')
 # plt.show()
 
 # Save the model to "data" folder
-model.save('data/model.keras')
+model.save('data/new_model.keras')
+print("Model completed and saved to files")
+model.summary()
 
-# TODO: Thuis een model runnen om te kijken of het probleem aan mac ligt zoals sommige op google denken
-
-# Apply an unknown image to the model and see the results
-sunflower_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/592px-Red_sunflower.jpg"
-sunflower_path = tf.keras.utils.get_file('Red_sunflower', origin=sunflower_url)
-
-img = tf.keras.utils.load_img(
-    sunflower_path, target_size=(img_height, img_width)
-)
-img_array = tf.keras.utils.img_to_array(img)
-img_array = tf.expand_dims(img_array, 0)  # Create a batch
-
-new_model = tf.keras.models.load_model('data/model.keras')
-new_model.summary()
-
-predictions = new_model.predict(img_array)
-score = tf.nn.softmax(predictions[0])
-
-print(
-    "This image most likely belongs to {} with a {:.2f} percent confidence."
-    .format(class_names[np.argmax(score)], 100 * np.max(score))
-)
+# TODO: Improve the model since it sucks and always returns the same class(which can be very much wrong) with low confidence
+#
+# print("Commencing image test")
+# # Apply an unknown image to the model and see the results
+# sunflower_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/592px-Red_sunflower.jpg"
+# sunflower_path = tf.keras.utils.get_file('Red_sunflower', origin=sunflower_url)
+#
+# img = tf.keras.utils.load_img(
+#     sunflower_path, target_size=(img_height, img_width)
+# )
+# img_array = tf.keras.utils.img_to_array(img)
+# img_array = tf.expand_dims(img_array, 0)  # Create a batch
+#
+# new_model = keras.models.load_model('data/new_model.keras')
+# new_model.compile(optimizer='adam',
+#               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+#               metrics=['accuracy'])
+#
+# new_model.summary()
+#
+# predictions = new_model.predict(img_array)
+# score = tf.nn.softmax(predictions[0])
+#
+# print(
+#     "This image most likely belongs to {} with a {:.2f} percent confidence."
+#     .format(class_names[np.argmax(score)], 100 * np.max(score))
+# )
