@@ -19,3 +19,5 @@ validation accuracy, which will give better results once the model will be used 
 
 In general a machine learning model should be able to achieve an accuracy of 95%, however this is very difficult
 to do. That's why a model with an accuracy between 70-90% is considered to be great!
+
+*Run the file from terminal, not a configuration RUN window*
