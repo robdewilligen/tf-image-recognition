@@ -90,37 +90,27 @@ AUTOTUNE = tf.data.AUTOTUNE
 train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
 val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
-# Standardize data
-normalization_layer = keras.layers.Rescaling(1. / 255)
-
-normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
-image_batch, labels_batch = next(iter(normalized_ds))
-first_image = image_batch[0]
-
-# Notice the pixel values are now in `[0,1]`.
-print(np.min(first_image), np.max(first_image))
-
 num_classes = len(class_names)
 
 # Create the model with sequential
 model = tf.keras.Sequential([
-    data_augmentation,  # apply data augmentation
-    tf.keras.layers.Rescaling(1. / 255),
+    # data_augmentation,  # apply data augmentation
+    tf.keras.layers.Rescaling(1. / 255, input_shape=(img_height, img_width, 3)),
     tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(data_format="channels_last"),
+    tf.keras.layers.MaxPooling2D(),
     tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(data_format="channels_last"),
+    tf.keras.layers.MaxPooling2D(),
     tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(data_format="channels_last"),
-    tf.keras.layers.Dropout(0.2),  # apply dropout
+    tf.keras.layers.MaxPooling2D(),
+    # tf.keras.layers.Dropout(0.2),  # apply dropout
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(num_classes, activation='softmax', name="outputs")
+    tf.keras.layers.Dense(num_classes, name="outputs")
 ])
 
 # Optimize the model
 model.compile(optimizer='adam',
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
 model.summary()
@@ -156,7 +146,7 @@ plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
 plt.savefig('plot.png')
-# plt.show()
+plt.show()
 
 # Save the model to "data" folder
 model.save('data/new_model.keras')
