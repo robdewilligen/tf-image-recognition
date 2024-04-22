@@ -16,3 +16,6 @@ Note: due to the dropouts we need to increase the amount of epochs to get a bett
 
 The addition of the second and third iteration allow the models accuracy to be closer to the 
 validation accuracy, which will give better results once the model will be used against unknown data
+
+In general a machine learning model should be able to achieve an accuracy of 95%, however this is very difficult
+to do. That's why a model with an accuracy between 70-90% is considered to be great!
