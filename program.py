@@ -7,9 +7,9 @@ from tensorflow.keras import layers, Sequential
 # Tutorial
 # https://www.tensorflow.org/tutorials/images/classification
 
-# Some notes for troubleshooting i encountered
+# Some notes for troubleshooting I encountered
 # - If the model does not perform how you want it to and is over or underfitting like crazy, wipe your cache of pictures in "~/.keras/datasets"
-# - Check if all your packages are up to date, for me Keras was not updated and broke everything.
+# - Check if all your packages are up-to-date, for me Keras was not updated and broke everything.
 
 dataset_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
 data_dir = tf.keras.utils.get_file('flower_photos.tar', origin=dataset_url, extract=True)
@@ -79,7 +79,7 @@ model = Sequential([
     layers.MaxPooling2D(),
     layers.Conv2D(64, 3, padding='same', activation='relu'),
     layers.MaxPooling2D(),
-    layers.Dropout(0.2),
+    layers.Dropout(0.3),
     layers.Flatten(),
     layers.Dense(128, activation='relu'),
     layers.Dense(num_classes, activation="softmax", name="Outputs")
@@ -98,4 +98,4 @@ history = model.fit(
     epochs=epochs
 )
 
-model.save('data/programmed_model.keras')
+model.save('data/model.keras')
